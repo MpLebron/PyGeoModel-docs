@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" role="img" aria-labelledby="title desc">
+  <title id="title">PyGeoModel service workflow diagram</title>
+  <desc id="desc">Notebook and Python API connected to OpenGMS model services with structured records.</desc>
+  <rect width="760" height="460" rx="18" fill="#0f172a"/>
+  <g opacity=".55">
+    <path d="M0 106h760M0 226h760M0 346h760M160 0v460M380 0v460M600 0v460" stroke="#1f2937" stroke-width="1"/>
+  </g>
+  <g font-family="Inter, ui-sans-serif, system-ui, sans-serif">
+    <rect x="54" y="70" width="210" height="116" rx="10" fill="#111827" stroke="#334155"/>
+    <text x="78" y="108" fill="#e5e7eb" font-size="18" font-weight="700">Python workflow</text>
+    <text x="78" y="138" fill="#94a3b8" font-size="14">search_models()</text>
+    <text x="78" y="162" fill="#94a3b8" font-size="14">get_model()</text>
+    <text x="78" y="186" fill="#94a3b8" font-size="14">invoke()</text>
+    <rect x="54" y="256" width="210" height="116" rx="10" fill="#111827" stroke="#334155"/>
+    <text x="78" y="294" fill="#e5e7eb" font-size="18" font-weight="700">Notebook interface</text>
+    <text x="78" y="324" fill="#94a3b8" font-size="14">widgets and parameter forms</text>
+    <text x="78" y="348" fill="#94a3b8" font-size="14">recommendation and Q&amp;A</text>
+    <rect x="498" y="92" width="210" height="116" rx="10" fill="#064e3b" stroke="#10b981"/>
+    <text x="522" y="130" fill="#ecfdf5" font-size="18" font-weight="700">OpenGMS services</text>
+    <text x="522" y="160" fill="#a7f3d0" font-size="14">model metadata</text>
+    <text x="522" y="184" fill="#a7f3d0" font-size="14">remote task execution</text>
+    <rect x="498" y="254" width="210" height="116" rx="10" fill="#111827" stroke="#334155"/>
+    <text x="522" y="292" fill="#e5e7eb" font-size="18" font-weight="700">Structured records</text>
+    <text x="522" y="322" fill="#94a3b8" font-size="14">TaskResult JSON</text>
+    <text x="522" y="346" fill="#94a3b8" font-size="14">Recommendation and QA trace</text>
+    <path d="M275 128h194" stroke="#34d399" stroke-width="4" stroke-linecap="round"/>
+    <path d="M458 116l18 12-18 12" fill="none" stroke="#34d399" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M275 314h194" stroke="#34d399" stroke-width="4" stroke-linecap="round"/>
+    <path d="M458 302l18 12-18 12" fill="none" stroke="#34d399" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M603 220v22" stroke="#34d399" stroke-width="4" stroke-linecap="round"/>
+    <path d="M591 233l12 14 12-14" fill="none" stroke="#34d399" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
