@@ -2,56 +2,108 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
+const packageVersion = "1.0.13";
 const githubUrl = "https://github.com/MpLebron/PyGeoModel";
+const caseUrl = "https://github.com/MpLebron/PyGeoModel-Case";
+const binderUrl = "https://mybinder.org/v2/gh/MpLebron/PyGeoModel-Case/main?urlpath=/doc/tree/code.ipynb";
 const opengmsUrl = "https://geomodeling.njnu.edu.cn";
-const pypiUrl = "https://pypi.org/project/PyGeoModel/";
+const pypiUrl = `https://pypi.org/project/PyGeoModel/${packageVersion}/`;
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+const routePath = (path) => `${basePath}${path}`;
+const assetPath = (path) => `${basePath}${path}`;
+
+const statusItems = [
+  { label: "PyPI", value: `v${packageVersion}` },
+  { label: "Catalog", value: "4,786 records" },
+  { label: "Case", value: "Binder ready" },
+  { label: "Workflow", value: "Python first" },
+];
+
+const workflowSteps = [
+  "Discover model services",
+  "Inspect metadata",
+  "Recommend candidates",
+  "Invoke OpenGMS tasks",
+  "Save returned outputs",
+];
 
 const featureSections = [
   {
-    title: "Discover model services from Python",
+    eyebrow: "Core API",
+    title: "Programmatic access is the primary workflow",
     body:
-      "PyGeoModel exposes the OpenGMS model-service catalog through ordinary Python objects, so users can search candidate services, inspect metadata, and keep those decisions inside an urban data science workflow.",
+      "PyGeoModel now exposes model-service discovery, metadata inspection, remote invocation, and output saving through explicit Python calls. The notebook case can therefore be rerun as a normal computational workflow instead of relying on transient GUI operations.",
     code: `from pygeomodel import GeoModeler
 
 modeler = GeoModeler()
-models = modeler.search_models("photovoltaic", limit=5)
-pv_model = modeler.get_model(models[0].name)
-pv_model.inputs`,
-  },
-  {
-    title: "Invoke remote OpenGMS tasks",
-    body:
-      "Model services are submitted through a consistent API. Parameters and file inputs are normalized against service metadata, and the returned TaskResult records the task id, inputs, outputs, endpoint, and execution metadata.",
-    code: `result = modeler.invoke(
+recommendation = modeler.suggest_model()
+
+result = modeler.invoke(
     "Roof Photovoltaic Carbon Emission Reduction Potential Assessment Model",
     params={
         "system_efficiency": 0.8,
-        "start_time": 201801,
-        "end_time": 201812,
-        "roof_vector_path": "data/rooftops.zip",
+        "start_time": "2018-01",
+        "end_time": "2018-12",
+        "roof_vector_path": "data/xuanwu_rooftop.zip",
     },
-    record_path="records/pv_task.json",
+)
+saved_files = result.save(output_dir="./data/")`,
+  },
+  {
+    eyebrow: "Model discovery",
+    title: "Recommendations are returned as ranked candidates",
+    body:
+      "The recommendation workflow returns a primary model together with candidate models and relevant data resources. This keeps model discovery as an assisted comparison step while leaving the final research decision to the user.",
+    code: `recommendation = modeler.suggest_model()
+
+recommendation.primary_model
+recommendation.candidates
+recommendation.recommended_data`,
+  },
+  {
+    eyebrow: "Execution",
+    title: "Returned model outputs can be saved directly",
+    body:
+      "TaskResult.save() downloads returned output resources into the working directory. In version 1.0.13, OpenGMS data-node URLs are normalized through the public data gateway, which improves Binder compatibility for hosted reproduction.",
+    code: `result = modeler.invoke(model_name, params=params)
+saved_files = result.save(output_dir="./data/")
+
+print(result.task_id)
+print(saved_files)`,
+  },
+  {
+    eyebrow: "Notebook interface",
+    title: "Interactive widgets remain optional",
+    body:
+      "For exploratory notebook analysis, PyGeoModel still provides a Jupyter interface for browsing models, configuring parameters, asking model-specific questions, and reviewing rich notebook displays. The same package functions remain available underneath.",
+    code: `modeler.show_models()
+modeler.invoke_model("Absolute Humidity Model")
+
+answer = modeler.ask_model(
+    "Absolute Humidity Model",
+    "What does the gas constant parameter mean?",
 )`,
   },
-  {
-    title: "Use the optional Jupyter interface",
-    body:
-      "For exploratory notebook work, PyGeoModel adds widget-based support for model browsing, parameter configuration, service execution, context-aware recommendation, and knowledge-enhanced model explanation.",
-    code: `modeler.show_models()
-modeler.invoke_model(
-    "Roof Photovoltaic Carbon Emission Reduction Potential Assessment Model"
-)
+];
 
-recommendation = modeler.suggest_model()
-answer = modeler.ask_model(model_name, question)`,
+const evidenceItems = [
+  {
+    title: "One-click case",
+    body: "The rooftop photovoltaic potential case runs from a Binder-hosted notebook and uses PyGeoModel==1.0.13.",
+    href: binderUrl,
+    label: "Open Binder case",
   },
   {
-    title: "Export reproducible records",
-    body:
-      "Programmatic calls and notebook interactions can be written as JSON records. This makes GUI-assisted exploration auditable instead of hidden in transient interface state.",
-    code: `modeler.last_result.to_json("records/task.json")
-modeler.last_recommendation.to_json("records/recommendation.json")
-modeler.last_answer.to_json("records/qa.json")`,
+    title: "Package release",
+    body: "The current PyPI release contains the reworked Python API, structured notebook displays, and result saving fixes.",
+    href: pypiUrl,
+    label: "View PyPI release",
+  },
+  {
+    title: "Open source code",
+    body: "The GitHub repository provides the package source, tests, catalog data, and OpenGMS client implementation.",
+    href: githubUrl,
+    label: "View source",
   },
 ];
 
@@ -60,38 +112,39 @@ const docsSections = [
     group: "Getting started",
     items: [
       { id: "installation", label: "Installation" },
-      { id: "configuration", label: "Configuration" },
       { id: "quick-start", label: "Quick start" },
+      { id: "binder-case", label: "Binder case" },
     ],
   },
   {
     group: "Using PyGeoModel",
     items: [
       { id: "core-api", label: "Core Python API" },
+      { id: "model-recommendation", label: "Model recommendation" },
+      { id: "model-execution", label: "Model execution" },
       { id: "notebook-interface", label: "Notebook interface" },
-      { id: "recommendation-qa", label: "Recommendation and Q&A" },
-      { id: "records", label: "Execution records" },
+      { id: "model-qa", label: "Model Q&A" },
     ],
   },
   {
     group: "Reference",
     items: [
+      { id: "records-results", label: "Results and records" },
       { id: "opengms-dependency", label: "OpenGMS dependency" },
       { id: "api-reference", label: "API reference" },
-      { id: "testing", label: "Testing checklist" },
       { id: "limitations", label: "Limitations" },
     ],
   },
 ];
 
 function App() {
-  const path = window.location.pathname;
+  const path = window.location.pathname.replace(basePath, "") || "/";
   return path.startsWith("/docs") ? <DocsPage /> : <LandingPage />;
 }
 
 function Logo({ compact = false }) {
   return (
-    <a className={`brand ${compact ? "brandCompact" : ""}`} href="/">
+    <a className={`brand ${compact ? "brandCompact" : ""}`} href={routePath("/")}>
       <span className="brandMark" aria-hidden="true">
         <svg viewBox="0 0 44 44">
           <path d="M12 8h20l9 14-9 14H12L3 22z" />
@@ -110,41 +163,69 @@ function LandingPage() {
         <nav className="homeNav">
           <Logo />
           <div className="navLinks">
-            <a href="/docs">Docs</a>
+            <a href={routePath("/docs")}>Docs</a>
+            <a href={binderUrl}>Case</a>
             <a href={githubUrl}>GitHub</a>
             <a href={opengmsUrl}>OpenGMS</a>
             <a href={pypiUrl}>PyPI</a>
           </div>
         </nav>
+
         <section className="hero">
-          <img className="heroLogo" src="/assets/pygeomodel-logo.svg" alt="PyGeoModel" />
-          <h1>A Python package for integrating geographic model services into urban data science workflows</h1>
-          <ul className="heroFacts" aria-label="Project facts">
-            <li>4,786 OpenGMS model-service records in the local catalog</li>
-            <li>Python API with an optional Jupyter interface</li>
-            <li>Structured execution, recommendation, and Q&A records</li>
-            <li>Open source package for service-oriented model reuse</li>
-          </ul>
-          <div className="heroActions">
-            <a className="primaryButton" href="/docs">Read the docs</a>
-            <a className="primaryButton" href="#quickstart">Quick start</a>
-            <a className="primaryButton" href={githubUrl}>GitHub</a>
+          <div className="heroText">
+            <p className="eyebrow">PyGeoModel {packageVersion}</p>
+            <h1>Python access to OpenGMS geographic model services</h1>
+            <p className="heroLead">
+              A Python package for integrating geographic model services into urban data science workflows, with a
+              programmatic API, optional Jupyter interface, ranked model recommendation, model Q&A, and Binder-ready
+              case reproduction.
+            </p>
+            <div className="heroActions">
+              <a className="primaryButton" href={routePath("/docs")}>Read the docs</a>
+              <a className="secondaryButton" href={binderUrl}>Run the Binder case</a>
+              <a className="ghostButton" href={githubUrl}>Source code</a>
+            </div>
+          </div>
+          <div className="heroPanel" aria-label="Current package status">
+            <img className="heroLogo" src={assetPath("/assets/pygeomodel-logo.svg")} alt="PyGeoModel" />
+            <div className="statusGrid">
+              {statusItems.map((item) => (
+                <div className="statusItem" key={item.label}>
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
-        <div className="greenRule" />
       </header>
 
       <main className="homeMain">
-        <section className="introBand" id="quickstart">
+        <section className="workflowBand" id="quickstart">
           <div>
-            <h2>Model-service access where the analysis already happens</h2>
+            <p className="eyebrow">Current workflow</p>
+            <h2>Model-service use can now be recorded as executable notebook code</h2>
             <p>
-              PyGeoModel connects OpenGMS model services with Python-based urban analysis. It keeps discovery,
-              metadata inspection, remote task submission, result management, and notebook-based assistance in one
-              computational workflow.
+              The revised package places Python calls at the center of the case workflow. The Jupyter GUI remains useful
+              for interactive exploration, but the reproducible path is now a concise sequence of package-level API
+              calls.
             </p>
           </div>
-          <img src="/assets/model-service-diagram.svg" alt="PyGeoModel service workflow" />
+          <ol className="workflowList">
+            {workflowSteps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="evidenceGrid" aria-label="Reviewer-facing software evidence">
+          {evidenceItems.map((item) => (
+            <a className="evidenceCard" href={item.href} key={item.title}>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+              <span>{item.label}</span>
+            </a>
+          ))}
         </section>
 
         <div className="featureStack">
@@ -154,26 +235,28 @@ function LandingPage() {
         </div>
 
         <section className="homeFooterLead">
-          <h2>Documentation focused on reviewer-facing software practice</h2>
+          <p className="eyebrow">Documentation scope</p>
+          <h2>Written for package users and manuscript review</h2>
           <p>
-            The documentation page covers installation, configuration, public API examples, notebook usage, record
-            export, OpenGMS service dependency, testing, and current limitations.
+            The documentation summarizes installation, quick-start examples, the core API, notebook interface, Binder
+            case reproduction, OpenGMS dependency, result handling, and current limitations.
           </p>
-          <a className="secondaryButton" href="/docs">Open documentation</a>
+          <a className="primaryButton" href={routePath("/docs")}>Open documentation</a>
         </section>
       </main>
       <footer className="landingFooter">
         <span>PyGeoModel documentation site</span>
-        <span>Built with React and Vite, styled after Sphinx/Furo documentation.</span>
+        <span>Built with React and Vite.</span>
       </footer>
     </div>
   );
 }
 
-function FeatureBlock({ title, body, code, reverse }) {
+function FeatureBlock({ eyebrow, title, body, code, reverse }) {
   return (
     <section className={`featureBlock ${reverse ? "reverse" : ""}`}>
       <div className="featureCopy">
+        <p className="eyebrow">{eyebrow}</p>
         <h2>{title}</h2>
         <p>{body}</p>
       </div>
@@ -188,6 +271,21 @@ function CodeBlock({ code }) {
       <code>{code}</code>
     </pre>
   );
+}
+
+function OutputBlock({ title = "Example output", children }) {
+  return (
+    <div className="outputBlock">
+      <div className="outputTitle">{title}</div>
+      <pre>
+        <code>{children}</code>
+      </pre>
+    </div>
+  );
+}
+
+function InlineCode({ children }) {
+  return <code className="inlineCode">{children}</code>;
 }
 
 function DocsPage() {
@@ -208,18 +306,19 @@ function DocsPage() {
             Menu
           </button>
           <div className="docsLinks">
-            <a href="/">Homepage</a>
+            <a href={routePath("/")}>Homepage</a>
+            <a href={binderUrl}>Case</a>
             <a href={githubUrl}>GitHub</a>
             <a href={opengmsUrl}>OpenGMS</a>
             <a href={pypiUrl}>PyPI</a>
           </div>
-          <div className="topSearch"><span>Search ...</span><kbd>⌘ K</kbd></div>
+          <div className="topSearch"><span>Search docs</span><kbd>Ctrl K</kbd></div>
         </div>
       </header>
 
       <div className="docsShell">
         <aside className={`leftSidebar ${navOpen ? "open" : ""}`} id="docs-sidebar">
-          <div className="searchBox"><span>Search docs</span><kbd>⌘ K</kbd></div>
+          <div className="searchBox"><span>Search docs</span><kbd>Ctrl K</kbd></div>
           {docsSections.map((section) => (
             <nav className="sidebarGroup" key={section.group} aria-label={section.group}>
               <p>{section.group}</p>
@@ -231,55 +330,76 @@ function DocsPage() {
         </aside>
 
         <article className="docsArticle">
-          <h1>PyGeoModel</h1>
+          <p className="eyebrow">PyGeoModel {packageVersion}</p>
+          <h1>Documentation</h1>
           <div className="docBadges" aria-label="Package metadata">
             <span>Python package</span>
             <span>OpenGMS services</span>
-            <span>Jupyter interface</span>
-            <span>Structured records</span>
+            <span>Binder case</span>
+            <span>Optional Jupyter interface</span>
           </div>
           <p className="lead">
             PyGeoModel is a Python package for integrating geographic model services into urban data science workflows.
-            It provides programmatic access to model-service discovery, metadata inspection, service invocation, task
-            submission, and result management. For exploratory notebook analysis, it further provides an interactive
-            Jupyter interface for context-aware model recommendation and knowledge-enhanced model Q&A.
+            It provides programmatic access to model-service discovery, metadata inspection, model recommendation,
+            service invocation, output saving, and knowledge-enhanced model Q&A. The Jupyter interface is an optional
+            exploratory use form built on top of the package API.
           </p>
 
           <DocSection id="installation" title="Installation">
-            <p>Install the package from PyPI after creating a clean Python environment.</p>
-            <CodeBlock code={`pip install PyGeoModel`} />
-          </DocSection>
-
-          <DocSection id="configuration" title="Configuration">
-            <p>
-              OpenGMS execution is an online service workflow. Configure the service token and optional endpoint
-              overrides through environment variables.
-            </p>
-            <CodeBlock code={`export OGMS_TOKEN="your-opengms-token"
-export OGMS_BASE_PORTAL_URL="https://geomodeling.njnu.edu.cn"
-export OGMS_BASE_MANAGER_URL="https://geomodeling.njnu.edu.cn/modelItem"
-export OGMS_BASE_DATA_URL="https://geomodeling.njnu.edu.cn/data"`} />
-            <div className="note">
-              PyGeoModel does not package private credentials. Tokens should be provided at runtime through the
-              environment or a local configuration mechanism outside version control.
-            </div>
+            <p>Install the current release from PyPI in a clean Python environment.</p>
+            <CodeBlock code={`pip install PyGeoModel==${packageVersion}`} />
           </DocSection>
 
           <DocSection id="quick-start" title="Quick start">
+            <p>
+              The shortest reproducible path is to instantiate <InlineCode>GeoModeler</InlineCode>, request model
+              recommendation, invoke a selected OpenGMS model service, and save the returned output files.
+            </p>
             <CodeBlock code={`from pygeomodel import GeoModeler
 
 modeler = GeoModeler()
-results = modeler.search_models("photovoltaic", limit=5)
-model = modeler.get_model(results[0].name)
+recommendation = modeler.suggest_model()
 
-print(model.name)
-print([item.name for item in model.inputs])`} />
+result = modeler.invoke(
+    "Roof Photovoltaic Carbon Emission Reduction Potential Assessment Model",
+    params={
+        "system_efficiency": 0.8,
+        "start_time": "2018-01",
+        "end_time": "2018-12",
+        "roof_vector_path": "data/xuanwu_rooftop.zip",
+    },
+)
+saved_files = result.save(output_dir="./data/")`} />
+            <OutputBlock>
+{`RecommendationResult
+  primary_model: Roof Photovoltaic Carbon Emission Reduction Potential Assessment Model
+  candidates: 5 ranked model services
+  relevant_data: data/xuanwu_rooftop.zip
+
+TaskResult
+  status: completed
+  task_id: 6a04...
+  outputs: 1 OpenGMS output resource
+  downloaded_outputs: ./data/SolarCalculation-roofSloar.zip`}
+            </OutputBlock>
+          </DocSection>
+
+          <DocSection id="binder-case" title="Binder case">
+            <p>
+              The demonstration case assesses rooftop photovoltaic potential in Xuanwu District, Nanjing. It uses the
+              package-level API in a notebook so model recommendation, model execution, parameters, and output saving
+              remain visible in the computational workflow.
+            </p>
+            <div className="linkRow">
+              <a className="primaryButton" href={binderUrl}>Run the Binder notebook</a>
+              <a className="secondaryButton" href={caseUrl}>View case repository</a>
+            </div>
           </DocSection>
 
           <DocSection id="core-api" title="Core Python API">
             <p>
-              The core API is designed for users who want scriptable access to OpenGMS model services without relying on
-              notebook widgets.
+              The core API is intended for scriptable access to OpenGMS model services. It can be used in notebooks,
+              scripts, tests, and reproducible case studies.
             </p>
             <table>
               <thead>
@@ -287,66 +407,148 @@ print([item.name for item in model.inputs])`} />
               </thead>
               <tbody>
                 <tr><td>search_models(query, limit)</td><td>Search local model-service metadata.</td><td>ModelSummary[]</td></tr>
-                <tr><td>get_model(model_name)</td><td>Inspect inputs, outputs, states, md5, and description.</td><td>ModelService</td></tr>
-                <tr><td>invoke(model_name, params)</td><td>Submit an OpenGMS model task.</td><td>TaskResult</td></tr>
+                <tr><td>get_model(model_name)</td><td>Inspect inputs, outputs, states, md5, description, and tags.</td><td>ModelService</td></tr>
+                <tr><td>suggest_model()</td><td>Return a primary recommendation, ranked candidates, and relevant data.</td><td>RecommendationResult</td></tr>
+                <tr><td>invoke(model_name, params)</td><td>Submit an OpenGMS model-service task.</td><td>TaskResult</td></tr>
+                <tr><td>ask_model(model_name, question)</td><td>Ask a model-specific question using OpenGMS knowledge and web-enabled literature-aware answering.</td><td>QAResult</td></tr>
               </tbody>
             </table>
-            <CodeBlock code={`result = modeler.invoke(
-    model.name,
-    params={"system_efficiency": 0.8, "roof_vector_path": "rooftops.zip"},
-    wait=True,
-    record_path="records/task.json",
-)`} />
+          </DocSection>
+
+          <DocSection id="model-recommendation" title="Model recommendation">
+            <p>
+              Recommendation is designed to support model discovery and comparison. It identifies candidate model
+              services that are relevant to the user's task, data, and modeling context. The user's research design
+              remains the basis for final model choice.
+            </p>
+            <CodeBlock code={`recommendation = modeler.suggest_model()
+
+recommendation.primary_model
+recommendation.candidates
+recommendation.recommended_data`} />
+            <OutputBlock title="Example ranked recommendation">
+{`★ Rank 1  Roof Photovoltaic Carbon Emission Reduction Potential Assessment Model
+          Recommended for rooftop PV potential assessment and carbon-emission reduction analysis.
+
+  Rank 2  Urban Solar Potential Model
+          Related candidate for estimating solar potential across urban roof surfaces.
+
+  Rank 3  Solar Radiation Estimation Model
+          Useful when the analysis focuses on location-specific solar radiation inputs.
+
+Relevant data
+  Local data: data/xuanwu_rooftop.zip
+  Knowledge-base data: optional supplementary solar or climate resources`}
+            </OutputBlock>
+          </DocSection>
+
+          <DocSection id="model-execution" title="Model execution">
+            <p>
+              Model execution submits parameters and file inputs to OpenGMS and returns a <InlineCode>TaskResult</InlineCode>.
+              Use <InlineCode>save()</InlineCode> to download returned output resources into the current project.
+            </p>
+            <CodeBlock code={`result = modeler.invoke(model_name, params=params)
+saved_files = result.save(output_dir="./data/")
+
+result.task_id
+result.outputs
+saved_files`} />
+            <OutputBlock title="Example task result">
+{`TaskResult(
+    model_name="Roof Photovoltaic Carbon Emission Reduction Potential Assessment Model",
+    status="completed",
+    task_id="6a04...",
+    outputs=[
+        {
+            "statename": "SolarCalculation",
+            "event": "roofSloar",
+            "suffix": "zip",
+            "url": "https://geomodeling.njnu.edu.cn/dataTransferServer/data/..."
+        }
+    ],
+    downloaded_outputs=[
+        "./data/SolarCalculation-roofSloar.zip"
+    ]
+)`}
+            </OutputBlock>
+            <div className="note">
+              Version {packageVersion} normalizes OpenGMS internal data-node download URLs through the public data
+              gateway before downloading output files. This improves compatibility with hosted notebook environments
+              such as Binder.
+            </div>
           </DocSection>
 
           <DocSection id="notebook-interface" title="Notebook interface">
             <p>
-              The notebook interface is an optional interactive form for exploratory analysis. It is built on top of the
-              same package functions used by the core API.
+              The widget interface is an optional interactive form for exploratory analysis. It supports model browsing,
+              parameter configuration, model execution, and model-specific Q&A while keeping the Python API available.
             </p>
             <CodeBlock code={`modeler.show_models()
-modeler.invoke_model("Roof Photovoltaic Carbon Emission Reduction Potential Assessment Model")
-
-modeler.last_result
-modeler.last_recommendation
-modeler.last_answer`} />
+modeler.invoke_model("Absolute Humidity Model")`} />
           </DocSection>
 
-          <DocSection id="recommendation-qa" title="Recommendation and Q&A">
+          <DocSection id="model-qa" title="Model Q&A">
             <p>
-              Recommendation and Q&A are exposed as structured Python results, so notebook assistance can be inspected,
-              stored, and discussed as part of the analysis record.
+              Model Q&A returns a structured <InlineCode>QAResult</InlineCode>. In notebooks, answers are rendered as a
+              clean rich display with sources. The answer is grounded in OpenGMS model metadata and can draw on
+              literature-oriented web search when answering broader model questions.
             </p>
-            <CodeBlock code={`recommendation = modeler.suggest_model(
-    context="Assess rooftop photovoltaic potential in Nanjing.",
-    data_context="A zipped rooftop polygon dataset is available.",
+            <CodeBlock code={`answer = modeler.ask_model(
+    "Absolute Humidity Model",
+    "What does the gas constant parameter mean?",
 )
 
-answer = modeler.ask_model(
-    recommendation.primary_model["name"],
-    "What input data are required for this model?",
-)`} />
+answer.answer
+answer.sources`} />
+            <OutputBlock title="Example Q&A result">
+{`QAResult
+  question: What does the gas constant parameter mean?
+  model_name: Absolute Humidity Model
+
+  answer:
+    The gas constant R links pressure, volume, amount of substance, and temperature
+    in the ideal-gas relation. In the Absolute Humidity Model, it is used together
+    with vapor pressure, molar mass of water, and temperature to convert vapor
+    pressure into absolute humidity or water-vapor density.
+
+  sources:
+    - OpenGMS Knowledge Base: Absolute Humidity Model
+    - Web or literature-oriented source returned by the web-enabled model`}
+            </OutputBlock>
           </DocSection>
 
-          <DocSection id="records" title="Execution records">
+          <DocSection id="records-results" title="Results and records">
             <p>
-              TaskResult, RecommendationResult, and QAResult all provide to_json(path). These records document executed
-              parameters, selected model metadata, returned outputs, recommendation context, and Q&A sources.
+              The primary reproducibility mechanism is executable Python code in the notebook. Returned objects also
+              expose structured attributes and optional JSON export for users who want additional audit records.
             </p>
-            <CodeBlock code={`result.to_json("records/task.json")
-recommendation.to_json("records/recommendation.json")
-answer.to_json("records/qa.json")`} />
+            <CodeBlock code={`result.model_name
+result.params
+result.outputs
+result.downloaded_outputs
+
+result.to_json("records/task.json")  # optional`} />
+            <OutputBlock title="Example saved output list">
+{`[
+  "./data/SolarCalculation-roofSloar.zip"
+]
+
+Optional JSON record
+  records/task.json
+  records/recommendation.json
+  records/qa.json`}
+            </OutputBlock>
           </DocSection>
 
           <DocSection id="opengms-dependency" title="OpenGMS dependency">
             <p>
-              PyGeoModel is a client package for OpenGMS model services. The package keeps the Python workflow stable,
-              but model execution depends on network connectivity, a valid token, and the availability of the OpenGMS
-              service infrastructure.
+              PyGeoModel is a client package for OpenGMS model services. Local catalog search and metadata inspection
+              are package-level operations, while online model execution depends on network connectivity and OpenGMS
+              service availability.
             </p>
             <div className="note">
-              When a service endpoint is unavailable, users should keep the exported task record and contact the OpenGMS
-              development team with the task id, model name, and request time.
+              OpenGMS is the long-term model-service infrastructure. PyGeoModel provides the Python package interface
+              for discovery, invocation, notebook use, and result management.
             </div>
           </DocSection>
 
@@ -356,30 +558,20 @@ answer.to_json("records/qa.json")`} />
                 <tr><th>Object</th><th>Description</th></tr>
               </thead>
               <tbody>
-                <tr><td>GeoModeler</td><td>Main user-facing entry point for catalog access, invocation, recommendation, and Q&A.</td></tr>
+                <tr><td>GeoModeler</td><td>Main entry point for catalog access, model recommendation, invocation, notebook interface, and Q&A.</td></tr>
                 <tr><td>ModelService</td><td>Parsed OpenGMS model metadata including inputs, outputs, states, description, tags, and md5.</td></tr>
-                <tr><td>TaskResult</td><td>Serializable record of a submitted or completed model-service task.</td></tr>
-                <tr><td>RecommendationResult</td><td>Structured result for model recommendation, candidate models, data suggestions, context, and trace.</td></tr>
-                <tr><td>QAResult</td><td>Structured answer with question, model name, sources, context, and raw response metadata.</td></tr>
+                <tr><td>TaskResult</td><td>Structured result of a submitted model-service task, including output metadata and downloaded output paths.</td></tr>
+                <tr><td>RecommendationResult</td><td>Primary model recommendation, candidate list, relevant data resources, context, and raw response metadata.</td></tr>
+                <tr><td>QAResult</td><td>Question, answer, model name, sources, context, and raw response metadata.</td></tr>
               </tbody>
             </table>
           </DocSection>
 
-          <DocSection id="testing" title="Testing checklist">
-            <ul>
-              <li>Run unit tests with python -m unittest discover -s tests.</li>
-              <li>Verify catalog loading returns 4,786 local model records.</li>
-              <li>Run search_models("photovoltaic") and inspect the returned ModelSummary objects.</li>
-              <li>Use a mocked OpenGMS client for offline TaskResult and record-export tests.</li>
-              <li>Run online OpenGMS checks only after setting OGMS_TOKEN.</li>
-            </ul>
-          </DocSection>
-
           <DocSection id="limitations" title="Limitations">
             <p>
-              PyGeoModel does not independently validate every model service in OpenGMS, and it does not execute models
+              PyGeoModel does not independently validate every OpenGMS model service, and it does not execute models
               offline. Scientific validation remains model specific and should be assessed through OpenGMS metadata,
-              related publications, manuals, calibration reports, and the user's application context.
+              related publications, manuals, calibration or validation studies, and the user's application context.
             </p>
           </DocSection>
         </article>
@@ -393,7 +585,7 @@ answer.to_json("records/qa.json")`} />
       </div>
 
       <footer className="docsFooter">
-        <p>© 2026, PyGeoModel authors. Built with React and Vite, styled after Sphinx/Furo documentation.</p>
+        <p>Copyright 2026, PyGeoModel authors. Built with React and Vite.</p>
       </footer>
     </div>
   );
