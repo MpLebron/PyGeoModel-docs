@@ -16,7 +16,7 @@ npm run dev
 Routes:
 
 - `/PyGeoModel-docs/` landing page on GitHub Pages
-- `/PyGeoModel-docs/docs` documentation page on GitHub Pages
+- `/PyGeoModel-docs/?page=docs` documentation page on GitHub Pages
 
 ## Build
 
@@ -24,4 +24,4 @@ Routes:
 npm run build
 ```
 
-The build script writes both `dist/index.html` and `dist/404.html` so the `/docs` route can be opened directly on GitHub Pages.
+The build script writes both `dist/index.html` and `dist/404.html` so direct links still render the single-page app on GitHub Pages.

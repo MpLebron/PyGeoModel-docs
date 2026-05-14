@@ -11,6 +11,7 @@ const pypiUrl = `https://pypi.org/project/PyGeoModel/${packageVersion}/`;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 const routePath = (path) => `${basePath}${path}`;
 const assetPath = (path) => `${basePath}${path}`;
+const docsRoute = `${routePath("/")}?page=docs`;
 
 const statusItems = [
   { label: "PyPI", value: `v${packageVersion}` },
@@ -139,7 +140,8 @@ const docsSections = [
 
 function App() {
   const path = window.location.pathname.replace(basePath, "") || "/";
-  return path.startsWith("/docs") ? <DocsPage /> : <LandingPage />;
+  const page = new URLSearchParams(window.location.search).get("page");
+  return page === "docs" || path.startsWith("/docs") ? <DocsPage /> : <LandingPage />;
 }
 
 function Logo({ compact = false }) {
@@ -163,7 +165,7 @@ function LandingPage() {
         <nav className="homeNav">
           <Logo />
           <div className="navLinks">
-            <a href={routePath("/docs")}>Docs</a>
+            <a href={docsRoute}>Docs</a>
             <a href={binderUrl}>Case</a>
             <a href={githubUrl}>GitHub</a>
             <a href={opengmsUrl}>OpenGMS</a>
@@ -181,7 +183,7 @@ function LandingPage() {
               case reproduction.
             </p>
             <div className="heroActions">
-              <a className="primaryButton" href={routePath("/docs")}>Read the docs</a>
+              <a className="primaryButton" href={docsRoute}>Read the docs</a>
               <a className="secondaryButton" href={binderUrl}>Run the Binder case</a>
               <a className="ghostButton" href={githubUrl}>Source code</a>
             </div>
@@ -241,7 +243,7 @@ function LandingPage() {
             The documentation summarizes installation, quick-start examples, the core API, notebook interface, Binder
             case reproduction, OpenGMS dependency, result handling, and current limitations.
           </p>
-          <a className="primaryButton" href={routePath("/docs")}>Open documentation</a>
+          <a className="primaryButton" href={docsRoute}>Open documentation</a>
         </section>
       </main>
       <footer className="landingFooter">
