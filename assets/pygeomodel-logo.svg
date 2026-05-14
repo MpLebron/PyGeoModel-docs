@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 120" role="img" aria-labelledby="title desc">
+  <title id="title">PyGeoModel logo</title>
+  <desc id="desc">A geometric mark connecting Python workflows with geographic model services.</desc>
+  <defs>
+    <linearGradient id="g" x1="38" x2="112" y1="14" y2="104" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34d399"/>
+      <stop offset="1" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M41 26h50l28 34-28 34H41L13 60z"/>
+    <path d="M37 43h58M29 60h74M37 77h58"/>
+    <path d="M66 26v68M41 26c13 16 13 52 0 68M91 26c-13 16-13 52 0 68"/>
+    <circle cx="119" cy="60" r="8" fill="#10b981" stroke="none"/>
+    <path d="M127 60h34"/>
+    <path d="M162 39h38l17 21-17 21h-38l-17-21z"/>
+    <path d="M175 50h21M175 70h21"/>
+  </g>
+  <text x="235" y="54" fill="#f9fafb" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="36" font-weight="700">PyGeoModel</text>
+  <text x="237" y="83" fill="#a7f3d0" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="15">Python access to geographic model services</text>
+</svg>
